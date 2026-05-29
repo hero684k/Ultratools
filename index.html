@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, viewport-fit=cover">
+    <title>⚡ UltraTools | hero684k</title>
+    <meta name="description" content="UltraTools — портативный набор мини-инструментов: калькулятор, заметки, таймер, секундомер, генератор паролей">
+    <meta name="author" content="hero684k">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta property="og:title" content="UltraTools | hero684k">
+    <meta property="og:description" content="Мини-инструменты в одном месте">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #8b5cf6; --primary-dark: #7c3aed; --secondary: #a78bfa; --primary-light: #4c1d95;
+            --text-dark: #f8fafc; --text-gray: #cbd5e1; --text-muted: #94a3b8;
+            --bg-body: #020617; --bg-card: #0f172a; --bg-hover: #1e293b; --card-border: #1f2937;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3); --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+            --shadow-glow: 0 0 30px rgba(139, 92, 246, 0.3); --radius: 18px; --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-body); color: var(--text-dark); line-height: 1.5; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 50% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 70%), radial-gradient(ellipse at 80% 70%, rgba(79, 70, 229, 0.05) 0%, transparent 60%); pointer-events: none; z-index: 0; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes particleFall { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.2; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
+        .particles-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .particle { position: absolute; top: -30px; color: var(--primary); opacity: 0; animation: particleFall linear forwards; }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo-center {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), #c4b5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            animation: fadeInUp 0.8s ease;
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
+        }
+
+        .dashboard {
+            width: 100%;
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 2.5rem;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s;
+            border: 1px solid var(--card-border);
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .tab-bar {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
+            padding: 1.2rem 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid var(--card-border);
+            backdrop-filter: blur(10px);
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 0.7rem 1.4rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(15px);
+            flex-shrink: 0;
+        }
+
+        .tab i { font-style: normal; font-size: 1.1rem; }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e3e8ff;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
+            color: white;
+            border-color: #8b9cff;
+            box-shadow: 0 0 22px rgba(139, 92, 246, 0.5);
+            font-weight: 700;
+        }
+
+        @keyframes gradientMove { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+        .content-area {
+            padding: 2rem 2rem 2.2rem;
+            background: rgba(8, 10, 20, 0.5);
+            backdrop-filter: blur(14px);
+            min-height: 460px;
+            display: flex;
+            flex-direction: column;
+            color: #eef2ff;
+        }
+
+        .tool-view {
+            display: none;
+            flex-direction: column;
+            gap: 1.4rem;
+            animation: fadeSlide 0.28s ease;
+        }
+
+        .tool-view.active { display: flex; }
+
+        @keyframes fadeSlide {
+            from { opacity: 0.4; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-weight: 700;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255,255,255,0.18);
+            padding-bottom: 0.8rem;
+            letter-spacing: -0.3px;
+        }
+
+        /* Calculator */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+            background: rgba(0,0,0,0.4);
+            padding: 1.3rem;
+            border-radius: 2.2rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .calc-screen {
+            grid-column: span 4;
+            background: #05070e;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.4rem;
+            font-size: 2.2rem;
+            font-weight: 500;
+            text-align: right;
+            color: #cdd9ff;
+            border: 1px solid #2f3450;
+            box-shadow: inset 0 8px 14px rgba(0,0,0,0.8);
+            overflow-x: auto;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+            min-height: 4.5rem;
+        }
+
+        .calc-key {
+            background: #202332;
+            border: none;
+            border-radius: 1.5rem;
+            padding: 0.9rem 0.2rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #eef3ff;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #0d0f17, 0 4px 10px black;
+            transition: all 0.07s;
+            text-align: center;
+            border: 1px solid #414863;
+        }
+
+        .calc-key:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #080a11, 0 4px 8px black;
+            background: #363b58;
+        }
+
+        .calc-key.operator {
+            background: #f08c2e;
+            border-color: #f9b153;
+            color: #0a0b14;
+            font-weight: 700;
+        }
+
+        .constants-panel {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+            justify-content: center;
+        }
+
+        .const-btn {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #c4b5fd;
+            padding: 0.5rem 1.1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all var(--transition);
+        }
+        .const-btn:hover {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .notes-container { display: flex; flex-direction: column; gap: 1rem; }
+        .note-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .note-tab {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.5rem 1.3rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            color: var(--text-gray);
+            transition: all var(--transition);
+        }
+        .note-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+        }
+        .note-tab:hover { border-color: var(--primary); }
+
+        textarea {
+            background: #11131f;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            color: #ddd;
+            border: 1px solid #3d425c;
+            resize: vertical;
+            min-height: 160px;
+            outline: none;
+            font-family: inherit;
+        }
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+
+        .timer-face {
+            font-size: 4.6rem;
+            font-weight: 700;
+            text-align: center;
+            background: #0a0c16;
+            border-radius: 3rem;
+            padding: 1.2rem;
+            letter-spacing: 2px;
+            font-variant-numeric: tabular-nums;
+            border: 1px solid var(--card-border);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background-size: 200% 200%;
+            animation: gradientMove 3s ease infinite;
+            border: none;
+            color: white;
+            padding: 0.8rem 1.6rem;
+            border-radius: 3rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6); }
+        .btn:active { transform: scale(0.96); }
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--card-border);
+            animation: none;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-secondary:hover { border-color: var(--primary); box-shadow: var(--shadow-glow); }
+
+        .password-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+        }
+        .password-options label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+        .password-options input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; }
+        .password-options input[type="number"] {
+            background: #1a1d2e; border: 1px solid var(--card-border);
+            color: white; padding: 0.5rem 0.8rem; border-radius: 2rem;
+            width: 75px; outline: none; font-weight: 600;
+        }
+        .password-options input[type="number"]:focus { border-color: var(--primary); }
+
+        .pass-display {
+            background: #0a0c16; padding: 1.2rem; border-radius: 2rem;
+            font-family: 'Courier New', monospace; font-size: 1.4rem;
+            word-break: break-all; border: 1px solid var(--card-border); text-align: center;
+        }
+
+        .input-field {
+            background: #1a1d2e; border: 1px solid var(--card-border);
+            color: white; padding: 0.7rem 1.2rem; border-radius: 2rem;
+            outline: none; font-weight: 500;
+        }
+        .input-field:focus { border-color: var(--primary); }
+
+        .row-buttons { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+
+        footer {
+            text-align: center; padding: 0.5rem 0;
+            color: var(--text-muted); font-size: 0.8rem;
+            position: relative; z-index: 1;
+        }
+        footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 750px) {
+            .tab { padding: 0.5rem 0.9rem; font-size: 0.78rem; gap: 0.3rem; }
+            .tab i { font-size: 1rem; }
+            .tab-bar { gap: 0.3rem; padding: 0.9rem 0.8rem; }
+            .calc-key { padding: 0.7rem 0.1rem; font-size: 1.1rem; }
+            .timer-face { font-size: 3rem; }
+            h2 { font-size: 1.5rem; }
+            .logo-center { font-size: 2rem; }
+        }
+        @media (max-width: 500px) {
+            .tab { padding: 0.4rem 0.7rem; font-size: 0.7rem; }
+        }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: var(--bg-body); } ::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles"></div>
+
+    <div class="main-wrapper">
+        <div class="logo-center">⚡ UltraTools</div>
+
+        <div class="dashboard">
+            <div class="tab-bar" id="tabBar">
+                <button class="tab active" data-tab="calc"><i>🧮</i>Калькулятор</button>
+                <button class="tab" data-tab="notes"><i>📝</i>Заметки</button>
+                <button class="tab" data-tab="timer"><i>⏱️</i>Таймер</button>
+                <button class="tab" data-tab="stopwatch"><i>⏲️</i>Секундомер</button>
+                <button class="tab" data-tab="password"><i>🔐</i>Пароль</button>
+            </div>
+
+            <div class="content-area">
+                <!-- Калькулятор -->
+                <div class="tool-view active" id="calc">
+                    <h2>🧮 Калькулятор</h2>
+                    <div class="calc-grid">
+                        <div class="calc-screen" id="calcDisplay">0</div>
+                        <button class="calc-key" data-key="clear">C</button>
+                        <button class="calc-key" data-key="backspace">⌫</button>
+                        <button class="calc-key" data-key="%">%</button>
+                        <button class="calc-key operator" data-key="/">÷</button>
+                        <button class="calc-key" data-key="7">7</button>
+                        <button class="calc-key" data-key="8">8</button>
+                        <button class="calc-key" data-key="9">9</button>
+                        <button class="calc-key operator" data-key="*">×</button>
+                        <button class="calc-key" data-key="4">4</button>
+                        <button class="calc-key" data-key="5">5</button>
+                        <button class="calc-key" data-key="6">6</button>
+                        <button class="calc-key operator" data-key="-">−</button>
+                        <button class="calc-key" data-key="1">1</button>
+                        <button class="calc-key" data-key="2">2</button>
+                        <button class="calc-key" data-key="3">3</button>
+                        <button class="calc-key operator" data-key="+">+</button>
+                        <button class="calc-key" data-key="0">0</button>
+                        <button class="calc-key" data-key=".">.</button>
+                        <button class="calc-key" data-key="Enter" style="grid-column: span 2;">=</button>
+                    </div>
+                    <div class="constants-panel">
+                        <span style="color:var(--text-muted); font-size:0.8rem; margin-right:0.3rem;">Константы:</span>
+                        <button class="const-btn" data-const="3.141592653589793">π</button>
+                        <button class="const-btn" data-const="2.718281828459045">e</button>
+                        <button class="const-btn" data-const="1.618033988749895">φ</button>
+                        <button class="const-btn" data-const="1.4142135623730951">√2</button>
+                        <button class="const-btn" data-const="0.6931471805599453">ln(2)</button>
+                    </div>
+                </div>
+
+                <!-- Заметки -->
+                <div class="tool-view" id="notes">
+                    <h2>📝 Много заметок</h2>
+                    <div class="note-tabs" id="noteTabs"></div>
+                    <textarea id="noteArea" placeholder="Пиши здесь..."></textarea>
+                    <div class="row-buttons">
+                        <button class="btn" id="addNoteBtn">➕ Новая</button>
+                        <button class="btn btn-secondary" id="deleteNoteBtn">🗑️ Удалить</button>
+                    </div>
+                </div>
+
+                <!-- Таймер -->
+                <div class="tool-view" id="timer">
+                    <h2>⏱️ Таймер обратного отсчёта</h2>
+                    <div class="timer-face" id="timerDisplay">00:00</div>
+                    <div class="row-buttons">
+                        <input type="number" id="timerInput" class="input-field" placeholder="Секунды" value="90" min="1" style="width:110px;">
+                        <button class="btn" id="timerStart">▶ Старт</button>
+                        <button class="btn btn-secondary" id="timerPause">⏸️ Пауза</button>
+                        <button class="btn btn-secondary" id="timerReset">↺ Сброс</button>
+                    </div>
+                </div>
+
+                <!-- Секундомер -->
+                <div class="tool-view" id="stopwatch">
+                    <h2>⏲️ Секундомер</h2>
+                    <div class="timer-face" id="stopwatchDisplay">00:00.00</div>
+                    <div class="row-buttons">
+                        <button class="btn" id="swStart">▶ Старт</button>
+                        <button class="btn btn-secondary" id="swPause">⏸️ Пауза</button>
+                        <button class="btn btn-secondary" id="swReset">↺ Сброс</button>
+                    </div>
+                </div>
+
+                <!-- Генератор паролей -->
+                <div class="tool-view" id="password">
+                    <h2>🔐 Генератор пароля</h2>
+                    <div class="pass-display" id="passDisplay">Нажми "Создать"</div>
+                    <div class="password-options">
+                        <label>Длина <input type="number" id="passLength" value="16" min="4" max="64"></label>
+                        <label><input type="checkbox" id="useUpper" checked> A-Z</label>
+                        <label><input type="checkbox" id="useLower" checked> a-z</label>
+                        <label><input type="checkbox" id="useDigits" checked> 0-9</label>
+                        <label><input type="checkbox" id="useSymbols"> !@#</label>
+                    </div>
+                    <div class="row-buttons">
+                        <button class="btn" id="genPassBtn">✨ Создать</button>
+                        <button class="btn btn-secondary" id="copyPassBtn">📋 Копировать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 <strong>hero684k</strong> | <a href="https://github.com/hero684k" target="_blank">GitHub</a> | MIT License</p>
+            <p style="font-size: 0.7rem; margin-top: 0.2rem; opacity: 0.6;">UltraTools — свободное программное обеспечение. Делай что хочешь.</p>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            // --- Particles ---
+            const particlesContainer = document.getElementById('particles');
+            const symbols = ['◻','◼','⬡','◆','•','▸','▪'];
+            function createParticle() {
+                const el = document.createElement('span');
+                el.className = 'particle';
+                el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.fontSize = (Math.random() * 1.2 + 0.5) + 'rem';
+                el.style.animationDuration = (Math.random() * 8 + 6) + 's';
+                el.style.opacity = Math.random() * 0.3 + 0.1;
+                particlesContainer.appendChild(el);
+                el.addEventListener('animationend', () => el.remove());
+            }
+            for (let i = 0; i < 40; i++) createParticle();
+            setInterval(createParticle, 500);
+
+            // --- Tabs ---
+            const tabs = document.querySelectorAll('.tab');
+            const views = document.querySelectorAll('.tool-view');
+            tabs.forEach(t => {
+                t.addEventListener('click', () => {
+                    const id = t.dataset.tab;
+                    tabs.forEach(b => b.classList.remove('active'));
+                    views.forEach(v => v.classList.remove('active'));
+                    t.classList.add('active');
+                    document.getElementById(id).classList.add('active');
+                });
+            });
+
+            // ===== CALCULATOR (keyboard + constants) =====
+            const calcDisplay = document.getElementById('calcDisplay');
+            let current = '0', previous = '', op = null, resetFlag = false;
+
+            function updateCalc() { calcDisplay.textContent = current || '0'; }
+            function clearCalc() { current = '0'; previous = ''; op = null; resetFlag = false; updateCalc(); }
+            function backspace() {
+                if (current.length === 1 || (current.length === 2 && current.startsWith('-'))) current = '0';
+                else current = current.slice(0, -1);
+                updateCalc();
+            }
+            function digit(d) {
+                if (resetFlag) { current = ''; resetFlag = false; }
+                if (d === '.' && current.includes('.')) return;
+                current = current === '0' && d !== '.' ? d : current + d;
+                updateCalc();
+            }
+            function setConstant(val) {
+                current = val;
+                resetFlag = false;
+                updateCalc();
+            }
+            function operator(opSign) {
+                if (op && !resetFlag) compute();
+                previous = current;
+                op = opSign;
+                resetFlag = true;
+            }
+            function compute() {
+                if (!op || resetFlag) return;
+                const a = parseFloat(previous), b = parseFloat(current);
+                if (isNaN(a) || isNaN(b)) return;
+                let res;
+                switch (op) {
+                    case '+': res = a + b; break;
+                    case '-': res = a - b; break;
+                    case '*': res = a * b; break;
+                    case '/': res = b !== 0 ? a / b : 'Ошибка'; break;
+                    case '%': res = b !== 0 ? a % b : 'Ошибка'; break;
+                    default: return;
+                }
+                current = typeof res === 'number' ? String(res) : res;
+                op = null; previous = ''; resetFlag = true;
+                updateCalc();
+            }
+
+            document.querySelectorAll('.calc-key').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const key = btn.dataset.key;
+                    if (key === 'clear') clearCalc();
+                    else if (key === 'backspace') backspace();
+                    else if (key === 'Enter') compute();
+                    else if (['+','-','*','/','%'].includes(key)) operator(key);
+                    else digit(key);
+                });
+            });
+
+            document.querySelectorAll('.const-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setConstant(btn.dataset.const);
+                });
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+                const key = e.key;
+                if ((key >= '0' && key <= '9') || key === '.') {
+                    e.preventDefault();
+                    digit(key);
+                }
+                else if (key === '+') {
+                    e.preventDefault();
+                    operator('+');
+                }
+                else if (key === '-') {
+                    e.preventDefault();
+                    operator('-');
+                }
+                else if (key === '*') {
+                    e.preventDefault();
+                    operator('*');
+                }
+                else if (key === '/') {
+                    e.preventDefault();
+                    operator('/');
+                }
+                else if (key === '%') {
+                    e.preventDefault();
+                    operator('%');
+                }
+                else if (key === 'Backspace') {
+                    e.preventDefault();
+                    backspace();
+                }
+                else if (key === 'Escape') {
+                    e.preventDefault();
+                    clearCalc();
+                }
+                else if (key === 'Enter') {
+                    e.preventDefault();
+                    compute();
+                }
+            });
+
+            // ===== NOTES =====
+            const noteTabsDiv = document.getElementById('noteTabs');
+            const noteArea = document.getElementById('noteArea');
+            let notes = JSON.parse(localStorage.getItem('hero684k_ultra_notes') || '["Заметка 1"]');
+            let activeNoteIdx = 0;
+
+            function saveNotes() { localStorage.setItem('hero684k_ultra_notes', JSON.stringify(notes)); }
+            function renderNoteTabs() {
+                noteTabsDiv.innerHTML = '';
+                notes.forEach((title, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'note-tab' + (i === activeNoteIdx ? ' active' : '');
+                    btn.textContent = title.slice(0, 15) || 'Без имени';
+                    btn.addEventListener('click', () => { activeNoteIdx = i; loadNoteContent(); renderNoteTabs(); });
+                    noteTabsDiv.appendChild(btn);
+                });
+            }
+            function loadNoteContent() {
+                const content = localStorage.getItem(`hero684k_ultra_note_${activeNoteIdx}`) || '';
+                noteArea.value = content;
+            }
+            noteArea.addEventListener('input', () => {
+                localStorage.setItem(`hero684k_ultra_note_${activeNoteIdx}`, noteArea.value);
+                const newTitle = noteArea.value.slice(0, 20) || 'Заметка';
+                if (notes[activeNoteIdx] !== newTitle) {
+                    notes[activeNoteIdx] = newTitle;
+                    saveNotes(); renderNoteTabs();
+                }
+            });
+            document.getElementById('addNoteBtn').addEventListener('click', () => {
+                notes.push('Новая заметка');
+                activeNoteIdx = notes.length - 1;
+                saveNotes(); renderNoteTabs(); loadNoteContent();
+            });
+            document.getElementById('deleteNoteBtn').addEventListener('click', () => {
+                if (notes.length <= 1) return;
+                localStorage.removeItem(`hero684k_ultra_note_${activeNoteIdx}`);
+                notes.splice(activeNoteIdx, 1);
+                activeNoteIdx = Math.min(activeNoteIdx, notes.length - 1);
+                saveNotes(); renderNoteTabs(); loadNoteContent();
+            });
+            renderNoteTabs(); loadNoteContent();
+
+            // ===== TIMER =====
+            let timerInterval = null, timerSeconds = 90;
+            const timerDisplay = document.getElementById('timerDisplay');
+            function formatTimer(sec) {
+                const m = Math.floor(Math.max(0, sec) / 60);
+                const s = Math.floor(Math.max(0, sec) % 60);
+                return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+            function updateTimerUI() { timerDisplay.textContent = formatTimer(timerSeconds); }
+            document.getElementById('timerStart').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                const val = parseInt(document.getElementById('timerInput').value);
+                timerSeconds = (!isNaN(val) && val > 0) ? val : 60;
+                updateTimerUI();
+                timerInterval = setInterval(() => {
+                    if (timerSeconds <= 0) { clearInterval(timerInterval); timerInterval = null; alert('⏰ Время вышло!'); return; }
+                    timerSeconds--; updateTimerUI();
+                }, 1000);
+            });
+            document.getElementById('timerPause').addEventListener('click', () => clearInterval(timerInterval));
+            document.getElementById('timerReset').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                const val = parseInt(document.getElementById('timerInput').value);
+                timerSeconds = (!isNaN(val) && val > 0) ? val : 60;
+                updateTimerUI();
+            });
+            updateTimerUI();
+
+            // ===== STOPWATCH =====
+            let swInterval = null, swStartTime = 0, swElapsed = 0;
+            const swDisplay = document.getElementById('stopwatchDisplay');
+            function updateStopwatchUI() {
+                const totalMs = swElapsed;
+                const mins = Math.floor(totalMs / 60000);
+                const secs = Math.floor((totalMs % 60000) / 1000);
+                const ms = Math.floor((totalMs % 1000) / 10);
+                swDisplay.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${String(ms).padStart(2,'0')}`;
+            }
+            document.getElementById('swStart').addEventListener('click', () => {
+                clearInterval(swInterval);
+                swStartTime = Date.now() - swElapsed;
+                swInterval = setInterval(() => { swElapsed = Date.now() - swStartTime; updateStopwatchUI(); }, 10);
+            });
+            document.getElementById('swPause').addEventListener('click', () => { clearInterval(swInterval); swElapsed = Date.now() - swStartTime; updateStopwatchUI(); });
+            document.getElementById('swReset').addEventListener('click', () => { clearInterval(swInterval); swElapsed = 0; updateStopwatchUI(); });
+            updateStopwatchUI();
+
+            // ===== PASSWORD =====
+            const passDisplay = document.getElementById('passDisplay');
+            function generatePassword() {
+                const len = parseInt(document.getElementById('passLength').value) || 16;
+                let chars = '';
+                if (document.getElementById('useUpper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                if (document.getElementById('useLower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
+                if (document.getElementById('useDigits').checked) chars += '0123456789';
+                if (document.getElementById('useSymbols').checked) chars += '!@#$%^&*()-_=+[]{}|;:,.<>?';
+                if (!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
+                let pwd = '';
+                for (let i = 0; i < len; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+                passDisplay.textContent = pwd;
+            }
+            document.getElementById('genPassBtn').addEventListener('click', generatePassword);
+            document.getElementById('copyPassBtn').addEventListener('click', () => {
+                const text = passDisplay.textContent;
+                if (text && text !== 'Нажми "Создать"') {
+                    navigator.clipboard.writeText(text).then(() => alert('Пароль скопирован!'));
+                }
+            });
+            generatePassword();
+        })();
+    </script>
+</body>
+</html>
